@@ -27,11 +27,16 @@ if (!fs.existsSync(dataPath)) {
 //   });
 // };
 
-const saveContact = (name, email, phone) => {
-  const contact = { name, email, phone };
+const loadContact = () => {
   const fileBuffer = fs.readFileSync("data/contacts.json", "utf-8");
 
   const contacts = JSON.parse(fileBuffer);
+  return contacts;
+};
+
+const saveContact = (name, email, phone) => {
+  const contact = { name, email, phone };
+  const contacts = loadContact();
 
   // Cek Duplikat
   const duplicate = contacts.find((contact) => contact.name === name);
@@ -61,4 +66,55 @@ const saveContact = (name, email, phone) => {
   console.log("Terima kasih sudah memasukkan data");
 };
 
-module.exports = { saveContact };
+// Menampilkan daftar semua nama & no Hp
+const listContact = () => {
+  const contacts = loadContact();
+
+  console.log("======Daftar Kontak======");
+  contacts.map((contact, i) =>
+    console.log(`${i + 1}. ${contact.name} = ${contact.phone}`)
+  );
+};
+
+// Menampilkan detail contact
+const detailContact = (name) => {
+  const contacts = loadContact();
+
+  const contact = contacts.find(
+    (contact) => contact.name.toLowerCase() === name.toLowerCase()
+  );
+
+  if (!contact) {
+    console.log(`${name} tidak ditemukan!`);
+    return;
+  }
+
+  console.log("======Detail Kontak======");
+  console.log(`Nama: ${contact.name}`);
+  console.log(`Nomor Telepon: ${contact.phone}`);
+  console.log(`Email: ${contact.email}`);
+};
+
+// Menghapus contact berdasarkan nama
+const deleteContact = (name) => {
+  const contacts = loadContact();
+
+  const newContacts = contacts.filter(
+    (contact) => contact.name.toLowerCase() !== name.toLowerCase()
+  );
+
+  if (contacts.length === newContacts.length) {
+    console.log(`${name} tidak ditemukan!`);
+    return;
+  }
+
+  fs.writeFileSync(
+    "data/contacts.json",
+    JSON.stringify(newContacts),
+    "utf-8"
+  );
+
+  console.log(`${name} berhasil dihapus!`);
+};
+
+module.exports = { saveContact, listContact, detailContact, deleteContact };
